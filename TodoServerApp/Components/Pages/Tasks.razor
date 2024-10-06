@@ -1,5 +1,8 @@
 ﻿@page "/"
 
+@rendermode InteractiveServer
+@inject IDataService data
+@attribute [Authorize]
 
 <PageTitle>Задачи</PageTitle>
 
@@ -16,7 +19,14 @@
         </tr>
     </thead>
     <tbody>
-    @foreach(var task in tasks)
+        @if (tasks == null)
+        {
+            <tr>
+                <td colspan="5">Загрузка..</td>
+            </tr>
+        }
+        else{
+        @foreach(var task in tasks)
     {
         <tr>
         <td>@task.Id</td>
@@ -26,13 +36,16 @@
         <td>@task.FinishTDate</td>
         </tr>
     }
+        }
     </tbody>
 </table>
 @code {
-    IEnumerable<TaskItem> tasks = new List<TaskItem>
-        {
-            new TaskItem { Id = 1, Title = "Задача 1", Description="Описание задачи 1", CreateTDate=DateTime.Now},
-            new TaskItem { Id = 2, Title = "Задача 2", Description="Описание задачи 2", CreateTDate=DateTime.Now},
-            new TaskItem { Id = 3, Title = "Задача 3", Description="Описание задачи 3", CreateTDate=DateTime.Now},
-        };
+    IEnumerable<TaskItem>? tasks;
+    
+    protected override async Task OnInitializedAsync()
+    {
+     await base.OnInitializedAsync();
+        tasks = await data.GetTaskItemsAsync();
+    }
+
 }
